@@ -1,3 +1,6 @@
+"""
+Предоставляет набор подключаемых разрешений.
+"""
 from rest_framework import permissions
 
 

@@ -21,6 +21,11 @@ class TagAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
+class RecipeIngredientInline(admin.TabularInline):
+    model = models.RecipeIngredient
+    min_num = 1
+
+
 @admin.register(models.Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = (
@@ -31,6 +36,7 @@ class RecipeAdmin(admin.ModelAdmin):
     list_filter = ('name', 'author', 'tags')
     search_fields = ('name',)
     empty_value_display = '-пусто-'
+    inlines = (RecipeIngredientInline,)
 
     def in_favorites(self, obj):
         count = obj.recipes_favorite.count()

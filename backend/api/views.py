@@ -12,7 +12,7 @@ from rest_framework.permissions import (
     IsAuthenticatedOrReadOnly
 )
 
-from users.models import Subscription
+from users.models import Subscription, User
 from recipes.models import (
     Ingredient,
     Recipe,
@@ -33,7 +33,6 @@ from .serializers import (
     SubscribeSerializer,
     TagSerializer,
 )
-from users.models import User, Subscription
 
 
 def delete_obj(obj):
@@ -45,6 +44,17 @@ def delete_obj(obj):
         {'errors': 'Объект не существует.'},
         status=status.HTTP_400_BAD_REQUEST
     )
+
+
+def create_obj(obj, model, data, serializer):
+    """Создание объекта."""
+    if obj:
+        return Response(
+            {'errors': 'Объект уже существует.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    model.objects.create(**data)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class CustomUserViewSet(UserViewSet):
@@ -85,7 +95,7 @@ class CustomUserViewSet(UserViewSet):
         methods=('post',), detail=True
     )
     def subscribe(self, request, id=None):
-        """Обрабатывает POST запрос users/subscribe."""
+        """Добавляем автора в подписку."""
         author = self.get_object()
         user = request.user
         if author == user:
@@ -93,14 +103,12 @@ class CustomUserViewSet(UserViewSet):
                 {'errors': 'Пользователь не может подписаться на самого себя.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        if Subscription.objects.filter(user=user, author=author).exists():
-            return Response(
-                {'errors': 'Подписка уже существует'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        Subscription.objects.create(author=author, user=user)
-        serializer = SubscribeSerializer(author, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return create_obj(
+            model=Subscription,
+            obj=author.subscribing.filter(user=user).exists(),
+            serializer=SubscribeSerializer(author, context={'request': request}),
+            data={'user': user, 'author': author}
+        )
 
     @subscribe.mapping.delete
     def delete_subscribe(self, request, id):
@@ -163,20 +171,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
             permission_classes=(IsAuthenticated,),
-            methods=('post',),
-            detail=True
+            methods=('post',), detail=True
         )
     def shopping_cart(self, request, pk=None):
         """Добавляем рецепт в список покупок."""
-        recipe = self.get_object() 
-        if recipe.recipes_cart.filter(user=request.user).exists():
-            return Response(
-                {'errors': 'Рецепт уже находиться в корзине.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        Cart.objects.create(user=request.user, recipe=self.get_object())
-        serializer = RecipeInfoSerializer(recipe)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        recipe = self.get_object()
+        return create_obj(
+            model=Cart,
+            obj=recipe.recipes_cart.filter(user=request.user).exists(),
+            serializer=RecipeInfoSerializer(recipe),
+            data={'user': request.user, 'recipe': recipe}
+        )
 
     @shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk=None):
@@ -190,15 +195,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def favorite(self, request, pk=None):
         """Добавляем рецепт в список избранное."""
-        recipe = self.get_object() 
-        if recipe.recipes_favorite.filter(user=request.user).exists():
-            return Response(
-                {'errors': 'Рецепт уже находиться в избранном.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        Favorite.objects.create(user=request.user, recipe=self.get_object())
-        serializer = RecipeInfoSerializer(recipe)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        recipe = self.get_object()
+        return create_obj(
+            model=Favorite,
+            obj=recipe.recipes_favorite.filter(user=request.user).exists(),
+            serializer=RecipeInfoSerializer(recipe),
+            data={'user': request.user, 'recipe': recipe}
+        )
 
     @favorite.mapping.delete
     def delete_favorite(self, request, pk=None):

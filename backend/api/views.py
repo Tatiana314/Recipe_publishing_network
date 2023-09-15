@@ -36,6 +36,17 @@ from .serializers import (
 from users.models import User, Subscription
 
 
+def delete_obj(obj):
+    """Удаление объекта."""
+    if obj:
+        obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    return Response(
+        {'errors': 'Объект не существует.'},
+        status=status.HTTP_400_BAD_REQUEST
+    )
+
+
 class CustomUserViewSet(UserViewSet):
     """Получаем/создаем пользователей."""
     serializer_class = CustomUserSerializer
@@ -93,17 +104,9 @@ class CustomUserViewSet(UserViewSet):
 
     @subscribe.mapping.delete
     def delete_subscribe(self, request, id):
-        """Обрабатывает DELETE запрос users/subscribe."""
-        subscription = Subscription.objects.filter(
-            user=request.user, author=self.get_object()
-        )
-        if subscription:
-            subscription.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(
-            {'errors': 'Подписки не существует.'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        """Удаляем автора из подписки."""
+        author = self.get_object()
+        return delete_obj(author.subscribing.filter(user=request.user))
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -179,13 +182,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def delete_shopping_cart(self, request, pk=None):
         """Удаляем рецепт из списка покупок."""
         recipe = self.get_object()
-        if not recipe.recipes_cart.filter(user=request.user).exists():
-            return Response(
-                {'errors': 'Рецепта нет в корзине.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        Cart.objects.filter(user=request.user, recipe=recipe).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return delete_obj(recipe.recipes_cart.filter(user=request.user))
 
     @action(
         permission_classes=(IsAuthenticated,),
@@ -205,12 +202,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @favorite.mapping.delete
     def delete_favorite(self, request, pk=None):
-        """Обрабатывает DELETE запрос recipes/favorite."""
+        """Удаляем рецепт из избранного."""
         recipe = self.get_object()
-        if not recipe.recipes_favorite.filter(user=request.user).exists():
-            return Response(
-                {'errors': 'Рецепта нет в избранном.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        recipe.recipes_favorite.filter(user=request.user).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return delete_obj(recipe.recipes_favorite.filter(user=request.user))

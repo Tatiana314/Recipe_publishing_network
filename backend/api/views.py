@@ -21,7 +21,7 @@ from recipes.models import (
     RecipeIngredient,
     Favorite
 )
-from .filters import RecipeFilter
+from .filters import IngredientFilter, RecipeFilter
 from .tabl import pdf_file_table
 from .permissions import AuthorOrReadOnly
 from .serializers import (
@@ -131,8 +131,9 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = None
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('name',)
+    #filterset_class = IngredientFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):

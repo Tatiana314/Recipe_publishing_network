@@ -12,7 +12,7 @@ from rest_framework.permissions import (
     IsAuthenticatedOrReadOnly
 )
 
-from users.models import Subscription, User
+from recipes.models import Subscription, User
 from recipes.models import (
     Ingredient,
     Recipe,

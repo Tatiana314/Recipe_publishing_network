@@ -14,7 +14,7 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split()
 
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = 'recipes.User'
 
 
 # Application definition
@@ -30,7 +30,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'djoser',
-    'users.apps.UsersConfig',
+    #'users.apps.UsersConfig',
     'recipes.apps.RecipesConfig',
     'api.apps.ApiConfig',
 ]

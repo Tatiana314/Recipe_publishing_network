@@ -6,7 +6,7 @@ from djoser.conf import settings
 
 from rest_framework import serializers
 
-from users.models import User
+from recipes.models import User
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 
 

@@ -5,9 +5,7 @@ from rest_framework import permissions
 
 
 class AuthorOrReadOnly(permissions.BasePermission):
-    """
-    Редактирование/удаление объекта доступно только автору объекта.
-    """
+    """Редактирование/удаление объекта доступно только автору объекта."""
     def has_object_permission(self, request, view, obj):
         return (
             request.method in permissions.SAFE_METHODS

@@ -1,4 +1,10 @@
+"""
+Конфигурация URL-адреса для API проекта foodgram.
+
+Список `urlpatterns` направляет URL-адреса в представления.
+"""
 from django.urls import include, path
+
 from rest_framework.routers import DefaultRouter
 
 from .views import (

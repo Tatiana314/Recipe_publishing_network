@@ -1,4 +1,8 @@
+"""
+Предоставляет набор подключаемых фильтров.
+"""
 import django_filters
+
 from recipes.models import Ingredient, Recipe, Tag
 
 

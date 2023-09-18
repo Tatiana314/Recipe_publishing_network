@@ -1,3 +1,6 @@
+"""
+Настройка сериализации/десереализацией данных.
+"""
 import base64
 
 from django.core.files.base import ContentFile
@@ -6,8 +9,7 @@ from djoser.conf import settings
 
 from rest_framework import serializers
 
-from recipes.models import User
-from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
+from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag, User
 
 
 class CustomUserSerializer(serializers.ModelSerializer):

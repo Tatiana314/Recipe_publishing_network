@@ -1,3 +1,6 @@
+"""
+Логика работы API.
+"""
 from django.db.models import Sum
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -7,19 +10,18 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import filters, viewsets, status
 from rest_framework.permissions import (
-    AllowAny,
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly
+    AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 )
 
-from recipes.models import Subscription, User
 from recipes.models import (
-    Ingredient,
-    Recipe,
-    Tag,
     Cart,
+    Favorite,
+    Ingredient,
+    User,
     RecipeIngredient,
-    Favorite
+    Recipe,
+    Subscription,
+    Tag,
 )
 from .filters import IngredientFilter, RecipeFilter
 from .tabl import pdf_file_table
@@ -100,13 +102,15 @@ class CustomUserViewSet(UserViewSet):
         user = request.user
         if author == user:
             return Response(
-                {'errors': 'Пользователь не может подписаться на самого себя.'},
+                {'errors': 'Запрещена подписка на самого себя.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         return create_obj(
             model=Subscription,
             obj=author.subscribing.filter(user=user).exists(),
-            serializer=SubscribeSerializer(author, context={'request': request}),
+            serializer=SubscribeSerializer(
+                author, context={'request': request}
+            ),
             data={'user': user, 'author': author}
         )
 
@@ -133,7 +137,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = None
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('name',)
-    #filterset_class = IngredientFilter
+    filterset_class = IngredientFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):

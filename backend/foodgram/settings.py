@@ -30,7 +30,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'djoser',
-    #'users.apps.UsersConfig',
     'recipes.apps.RecipesConfig',
     'api.apps.ApiConfig',
 ]
@@ -131,8 +130,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'api.pagination.CustomPagination',
-    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    # 'PAGE_SIZE': 6,
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated', 
     ],
@@ -142,9 +139,9 @@ REST_FRAMEWORK = {
 }
 
 DJOSER = {
-    "HIDE_USERS": False,
-    "PERMISSIONS":{
+    'HIDE_USERS': False,
+    'PERMISSIONS':{
         'user_list': ['rest_framework.permissions.AllowAny'],
     },
-    "LOGIN_FIELD": "email"
+    'LOGIN_FIELD': "email"
 }

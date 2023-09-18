@@ -86,7 +86,7 @@ class CustomUserViewSet(UserViewSet):
         serializer = SubscribeSerializer(
             self.paginate_queryset(self.queryset.filter(
                 subscribing__user=request.user
-            )),
+            )), 
             context={'request': request},
             many=True
         )

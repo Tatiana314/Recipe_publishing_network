@@ -132,8 +132,6 @@ dmypy.json
 # .idea
 .idea
 
-setup.cfg
-
 docker-compose.yml
 
 postman-collection

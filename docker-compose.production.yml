@@ -33,6 +33,6 @@ services:
       - frontend
     volumes:
       - static_volume:/staticfiles/
-      - media_volume:/var/www/foodgram/media/
+      - media_volume:/app/media/
     ports:
       - 9000:80

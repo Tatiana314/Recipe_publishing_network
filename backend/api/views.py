@@ -3,38 +3,23 @@
 """
 from django.db.models import Sum
 from django_filters.rest_framework import DjangoFilterBackend
-
 from djoser.views import UserViewSet
-
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import (AllowAny, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
-from rest_framework import filters, viewsets, status
-from rest_framework.permissions import (
-    AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
-)
 
-from recipes.models import (
-    Cart,
-    Favorite,
-    Ingredient,
-    User,
-    RecipeIngredient,
-    Recipe,
-    Subscription,
-    Tag,
-)
+from recipes.models import (Cart, Favorite, Ingredient, Recipe,
+                            RecipeIngredient, Subscription, Tag, User)
+
 from .filters import IngredientFilter, RecipeFilter
-from .tabl import pdf_file_table
 from .permissions import AuthorOrReadOnly
-from .serializers import (
-    CustomUserSerializer,
-    GetRecipeSerializer,
-    IngredientSerializer,
-    RecipeInfoSerializer,
-    CreateUpdateRecipeSerializer,
-    SubscribeSerializer,
-    TagSerializer,
-)
+from .serializers import (CreateUpdateRecipeSerializer, CustomUserSerializer,
+                          GetRecipeSerializer, IngredientSerializer,
+                          RecipeInfoSerializer, SubscribeSerializer,
+                          TagSerializer)
+from .tabl import pdf_file_table
 
 
 def delete_obj(obj):
@@ -67,9 +52,9 @@ class CustomUserViewSet(UserViewSet):
     queryset = User.objects.all()
 
     @action(
-            permission_classes=(IsAuthenticated,),
-            detail=False
-        )
+        permission_classes=(IsAuthenticated,),
+        detail=False
+    )
     def me(self, request):
         """Обрабатывает GET запрос users/me"""
         serializer = self.get_serializer(
@@ -78,15 +63,15 @@ class CustomUserViewSet(UserViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(
-            permission_classes=(IsAuthenticated,),
-            detail=False
-        )
+        permission_classes=(IsAuthenticated,),
+        detail=False
+    )
     def subscriptions(self, request):
         """Обрабатывает GET запрос users/subscriptions."""
         serializer = SubscribeSerializer(
             self.paginate_queryset(self.queryset.filter(
                 subscribing__user=request.user
-            )), 
+            )),
             context={'request': request},
             many=True
         )
@@ -157,9 +142,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
     @action(
-            permission_classes=(IsAuthenticated,),
-            detail=False
-        )
+        permission_classes=(IsAuthenticated,),
+        detail=False
+    )
     def download_shopping_cart(self, request):
         """Отдаем файл со списком покупок."""
         ingredients = list(
@@ -175,9 +160,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return pdf_file_table(data=ingredients, header_table=header_table)
 
     @action(
-            permission_classes=(IsAuthenticated,),
-            methods=('post',), detail=True
-        )
+        permission_classes=(IsAuthenticated,),
+        methods=('post',), detail=True
+    )
     def shopping_cart(self, request, pk=None):
         """Добавляем рецепт в список покупок."""
         recipe = self.get_object()

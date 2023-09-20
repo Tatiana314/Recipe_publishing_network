@@ -4,9 +4,7 @@
 import base64
 
 from django.core.files.base import ContentFile
-
 from djoser.conf import settings
-
 from rest_framework import serializers
 from rest_framework.settings import api_settings
 
@@ -42,7 +40,6 @@ class RecipeInfoSerializer(serializers.ModelSerializer):
 class SubscribeSerializer(CustomUserSerializer):
     """Список подписки пользователя."""
     recipes_count = serializers.SerializerMethodField()
-    #recipes = RecipeInfoSerializer(many=True, read_only=True)
     recipes = serializers.SerializerMethodField()
 
     class Meta(CustomUserSerializer.Meta):
@@ -53,17 +50,17 @@ class SubscribeSerializer(CustomUserSerializer):
             'recipes',
             'recipes_count'
         )
-    
+
     def get_recipes(self, obj):
         recipes_limit = self.context.get('request').query_params.get(
             'recipes_limit', api_settings.PAGE_SIZE
         )
         try:
             recipes_limit = int(self.context.get('request').query_params.get(
-                'recipes_limit', api_settings.PAGE_SIZE)
-        )
+                'recipes_limit', api_settings.PAGE_SIZE
+            ))
             recipes = obj.recipes.all()[:recipes_limit]
-        except:
+        except ValueError:
             recipes = obj.recipes.all()[:api_settings.PAGE_SIZE]
         return RecipeInfoSerializer(
             recipes, many=True, context=self.context

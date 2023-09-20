@@ -1,15 +1,18 @@
 """
 Создание pdf-файла.
 """
+from django.conf import settings
 from django.http import HttpResponse
-
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, Spacer
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table
 from reportlab.platypus.tables import TableStyle
+from reportlab.rl_config import TTFSearchPath
+
+TTFSearchPath.append(str(settings.BASE_DIR) + '/fonts')
 
 
 def pdf_file_table(data, header_table):

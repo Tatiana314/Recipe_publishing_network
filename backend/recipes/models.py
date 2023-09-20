@@ -1,9 +1,11 @@
-from django.db import models
+"""
+Настройка моделей проекта.
+"""
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator
+from django.db import models
 
 from foodgram.settings import AUTH_USER_MODEL
-
 
 RECIPE_DATA = '{name} - {author} - {date:%d.%m.%Y}'
 SUBSCRIPTIONS_DATA = '{user} подписан на {author}'
@@ -96,8 +98,8 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     """Модель Ингредиент."""
     name = models.CharField(
-    'Название', blank=False, null=False, max_length=200
-)
+        'Название', blank=False, null=False, max_length=200
+    )
     measurement_unit = models.CharField(
         'Ед.измерения', blank=False, null=False, max_length=200
     )
@@ -215,7 +217,7 @@ class CreatedModel(models.Model):
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
                 name='unique_%(class)s',
-                violation_error_message='Рецеп уже находится в списке %(class)s.'
+                violation_error_message='Рецеп уже находится в %(class)s.'
             )
         ]
 

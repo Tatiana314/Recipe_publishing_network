@@ -46,6 +46,8 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'foodgram.urls'
 
+CSRF_TRUSTED_ORIGINS = ["https://animalworld.zapto.org"]
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

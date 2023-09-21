@@ -5,3 +5,4 @@ idea
 .vscode
 .env
 db.sqlite3.bak
+run_app.sh

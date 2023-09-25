@@ -2,7 +2,9 @@
 Настройка моделей проекта.
 """
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import MinValueValidator
+from django.core.exceptions import ValidationError
+from django.core.validators import (MaxValueValidator, MinValueValidator,
+                                    RegexValidator)
 from django.db import models
 
 from foodgram.settings import AUTH_USER_MODEL
@@ -10,6 +12,9 @@ from foodgram.settings import AUTH_USER_MODEL
 RECIPE_DATA = '{name} - {author} - {date:%d.%m.%Y}'
 SUBSCRIPTIONS_DATA = '{user} подписан на {author}'
 USER_DATA = '{username} - {email} - {first_name} {last_name}'
+MAX_LENGTH_EMAIL = 254
+MAX_LENGTH_FIELD = 200
+MAX_LENGTH_NAME_USER = 150
 
 
 class User(AbstractUser):
@@ -21,13 +26,13 @@ class User(AbstractUser):
         'last_name',
     ]
     email = models.EmailField(
-        unique=True, max_length=254, blank=False, null=False
+        unique=True, max_length=MAX_LENGTH_EMAIL, blank=False, null=False
     )
     first_name = models.CharField(
-        'Имя', blank=False, null=False, max_length=150
+        'Имя', blank=False, null=False, max_length=MAX_LENGTH_NAME_USER
     )
     last_name = models.CharField(
-        'Фамилия', blank=False, null=False, max_length=150
+        'Фамилия', blank=False, null=False, max_length=MAX_LENGTH_NAME_USER
     )
 
     class Meta:
@@ -77,14 +82,25 @@ class Subscription(models.Model):
             author=self.author.username
         )
 
+    def clean(self):
+        if self.user == self.author:
+            raise ValidationError(
+                'Запрещена подписка на самого себя.'
+            )
+
 
 class Tag(models.Model):
     """Модель Тег."""
     name = models.CharField(
-        'Название', blank=False, null=False, max_length=200
+        'Название', blank=False, null=False, max_length=MAX_LENGTH_FIELD
     )
-    color = models.CharField('Цвет', null=True, max_length=7)
-    slug = models.SlugField('Метка', unique=True, max_length=200)
+    color = models.CharField('Цвет', null=True, max_length=7, validators=(
+        RegexValidator(
+            regex='^#([A-Fa-f0-9]{6})$',
+            message='Неправильное название цвета'
+        ),
+    ))
+    slug = models.SlugField('Метка', unique=True, max_length=MAX_LENGTH_FIELD)
 
     class Meta:
         ordering = ('name',)
@@ -98,16 +114,22 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     """Модель Ингредиент."""
     name = models.CharField(
-        'Название', blank=False, null=False, max_length=200
+        'Название', blank=False, null=False, max_length=MAX_LENGTH_FIELD
     )
     measurement_unit = models.CharField(
-        'Ед.измерения', blank=False, null=False, max_length=200
+        'Ед.измерения', blank=False, null=False, max_length=MAX_LENGTH_FIELD
     )
 
     class Meta:
         ordering = ('name',)
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'measurement_unit'],
+                name='unique_ingredient'
+            )
+        ]
 
     def __str__(self):
         return f'{self.name}, {self.measurement_unit}'
@@ -139,12 +161,14 @@ class Recipe(models.Model):
         help_text='Ингредиент, входящий в рецепт',
     )
     name = models.CharField(
-        'Название', blank=False, null=False, max_length=200
+        'Название', blank=False, null=False, max_length=MAX_LENGTH_FIELD
     )
     text = models.TextField('Описание')
     cooking_time = models.IntegerField(
         'Время приготовления',
-        blank=False, null=False, default=1, validators=(MinValueValidator(1),)
+        blank=False, null=False, validators=(
+            MinValueValidator(1), MaxValueValidator(5000000)
+        )
     )
     image = models.ImageField(
         'Изображение',
@@ -177,18 +201,25 @@ class RecipeIngredient(models.Model):
         Recipe,
         verbose_name='Рецепт',
         on_delete=models.CASCADE,
-        related_name='recipes'
+        related_name='recipe_ingredients'
     )
     amount = models.IntegerField(
         verbose_name='Кол-во',
         default=1,
-        validators=(MinValueValidator(1),)
+        validators=(MinValueValidator(1), MaxValueValidator(5000000))
     )
 
     class Meta:
         ordering = ('recipe',)
         verbose_name = 'Рецепт-ингредиент'
         verbose_name_plural = 'Рецепт-ингредиенты'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['ingredient', 'recipe'],
+                name='unique_recipeingredient',
+                violation_error_message='Ингредиент уже добавлен в рецепт.'
+            )
+        ]
 
     def __str__(self):
         return f'{self.ingredient}, {self.recipe}, {self.amount}'

@@ -10,41 +10,20 @@ from rest_framework.permissions import (AllowAny, IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 
-from recipes.models import (Cart, Favorite, Ingredient, Recipe,
-                            RecipeIngredient, Subscription, Tag, User)
+from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag, User
 
 from .filters import IngredientFilter, RecipeFilter
+from .mixinset import DeleteObjectMixin
 from .permissions import AuthorOrReadOnly
-from .serializers import (CreateUpdateRecipeSerializer, CustomUserSerializer,
+from .serializers import (CartSerializer, CreateUpdateRecipeSerializer,
+                          CustomUserSerializer, FavoriteSerializer,
                           GetRecipeSerializer, IngredientSerializer,
                           RecipeInfoSerializer, SubscribeSerializer,
-                          TagSerializer)
-from .tabl import pdf_file_table
+                          SubscriptionSerializer, TagSerializer)
+from .utils import pdf_file_table
 
 
-def delete_obj(obj):
-    """Удаление объекта."""
-    if obj:
-        obj.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-    return Response(
-        {'errors': 'Объект не существует.'},
-        status=status.HTTP_400_BAD_REQUEST
-    )
-
-
-def create_obj(obj, model, data, serializer):
-    """Создание объекта."""
-    if obj:
-        return Response(
-            {'errors': 'Объект уже существует.'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-    model.objects.create(**data)
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-class CustomUserViewSet(UserViewSet):
+class CustomUserViewSet(UserViewSet, DeleteObjectMixin):
     """Получаем/создаем пользователей."""
     serializer_class = CustomUserSerializer
     permission_classes = (AllowAny,)
@@ -57,7 +36,7 @@ class CustomUserViewSet(UserViewSet):
     )
     def me(self, request):
         """Обрабатывает GET запрос users/me"""
-        serializer = self.get_serializer(
+        serializer = CustomUserSerializer(
             request.user, context={'request': request}
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -84,26 +63,21 @@ class CustomUserViewSet(UserViewSet):
     def subscribe(self, request, id=None):
         """Добавляем автора в подписку."""
         author = self.get_object()
-        user = request.user
-        if author == user:
-            return Response(
-                {'errors': 'Запрещена подписка на самого себя.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        return create_obj(
-            model=Subscription,
-            obj=author.subscribing.filter(user=user).exists(),
-            serializer=SubscribeSerializer(
-                author, context={'request': request}
-            ),
-            data={'user': user, 'author': author}
+        serializer = SubscriptionSerializer(
+            data={'author': author.id, 'user': request.user.id}
         )
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(
+                SubscribeSerializer(author, context={'request': request}).data,
+                status=status.HTTP_201_CREATED
+            )
 
     @subscribe.mapping.delete
     def delete_subscribe(self, request, id):
         """Удаляем автора из подписки."""
         author = self.get_object()
-        return delete_obj(author.subscribing.filter(user=request.user))
+        return self.delete_obj(author.subscribing.filter(user=request.user))
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -121,11 +95,11 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = None
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    search_fields = ('name',)
+    search_fields = ('@name',)
     filterset_class = IngredientFilter
 
 
-class RecipeViewSet(viewsets.ModelViewSet):
+class RecipeViewSet(viewsets.ModelViewSet, DeleteObjectMixin):
     """CRUD модели - рецепт."""
     queryset = Recipe.objects.all()
     permission_classes = (IsAuthenticatedOrReadOnly, AuthorOrReadOnly)
@@ -141,10 +115,19 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(
-        permission_classes=(IsAuthenticated,),
-        detail=False
-    )
+    def create_obj(self, request, serializer):
+        recipe = self.get_object()
+        serializer = serializer(
+            data={'recipe': recipe.id, 'user': request.user.id}
+        )
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(
+                RecipeInfoSerializer(recipe).data,
+                status=status.HTTP_201_CREATED
+            )
+
+    @action(permission_classes=(IsAuthenticated,), detail=False)
     def download_shopping_cart(self, request):
         """Отдаем файл со списком покупок."""
         ingredients = list(
@@ -165,19 +148,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def shopping_cart(self, request, pk=None):
         """Добавляем рецепт в список покупок."""
-        recipe = self.get_object()
-        return create_obj(
-            model=Cart,
-            obj=recipe.recipes_cart.filter(user=request.user).exists(),
-            serializer=RecipeInfoSerializer(recipe),
-            data={'user': request.user, 'recipe': recipe}
-        )
+        return self.create_obj(request, serializer=CartSerializer)
 
     @shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk=None):
         """Удаляем рецепт из списка покупок."""
         recipe = self.get_object()
-        return delete_obj(recipe.recipes_cart.filter(user=request.user))
+        return self.delete_obj(recipe.recipes_cart.filter(user=request.user))
 
     @action(
         permission_classes=(IsAuthenticated,),
@@ -185,16 +162,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def favorite(self, request, pk=None):
         """Добавляем рецепт в список избранное."""
-        recipe = self.get_object()
-        return create_obj(
-            model=Favorite,
-            obj=recipe.recipes_favorite.filter(user=request.user).exists(),
-            serializer=RecipeInfoSerializer(recipe),
-            data={'user': request.user, 'recipe': recipe}
-        )
+        return self.create_obj(request, serializer=FavoriteSerializer)
 
     @favorite.mapping.delete
     def delete_favorite(self, request, pk=None):
         """Удаляем рецепт из избранного."""
         recipe = self.get_object()
-        return delete_obj(recipe.recipes_favorite.filter(user=request.user))
+        return self.delete_obj(
+            recipe.recipes_favorite.filter(user=request.user)
+        )

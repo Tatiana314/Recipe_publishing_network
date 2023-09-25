@@ -4,5 +4,3 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt --no-cache-dir
 COPY . .
 CMD ["gunicorn", "--bind", "0.0.0.0:9000", "foodgram.wsgi"]
-# RUN chmod +x run_app.sh
-# ENTRYPOINT ["/app/run_app.sh"]

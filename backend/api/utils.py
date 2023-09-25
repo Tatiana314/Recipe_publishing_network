@@ -31,13 +31,13 @@ def pdf_file_table(data, header_table):
     styles_header_table.alignment = 1
 
     doc = SimpleDocTemplate(response, pagesize=letter)
-    table = Table(data, colWidths=175, rowHeights=30)
+    table = Table(data, colWidths=(310, 70, None), rowHeights=30)
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.brown),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('FONTNAME', (0, 0), (-1, 0), 'Arial'),
-        ('FONTSIZE', (0, 0), (-1, 0), 18),
+        ('FONTSIZE', (0, 0), (-1, 0), 16),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
         ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
         ('FONTNAME', (0, 1), (-1, -1), 'Arial'),

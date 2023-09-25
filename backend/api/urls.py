@@ -12,14 +12,14 @@ from .views import (CustomUserViewSet, IngredientViewSet, RecipeViewSet,
 app_name = 'api'
 
 
-router_1 = DefaultRouter()
+router = DefaultRouter()
 
-router_1.register('users', CustomUserViewSet, basename='users')
-router_1.register('tags', TagViewSet, basename='tags')
-router_1.register('ingredients', IngredientViewSet, basename='ingredients')
-router_1.register('recipes', RecipeViewSet, basename='recipes')
+router.register('users', CustomUserViewSet, basename='users')
+router.register('tags', TagViewSet, basename='tags')
+router.register('ingredients', IngredientViewSet, basename='ingredients')
+router.register('recipes', RecipeViewSet, basename='recipes')
 
 urlpatterns = [
-    path('', include((router_1.urls))),
-    path('auth/', include('djoser.urls.authtoken')),  # Работа с токенами
+    path('', include((router.urls))),
+    path('auth/', include('djoser.urls.authtoken')),
 ]

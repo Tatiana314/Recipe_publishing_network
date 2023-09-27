@@ -65,7 +65,7 @@ class RecipeIngredientInline(admin.TabularInline):
 @admin.register(models.Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = (
-        'pk', 'name', 'author', 'in_favorites', 'consist',
+        'pk', 'name', 'author', 'in_favorites',
         'cooking_time', 'text', 'image', 'tag'
     )
     readonly_fields = ('in_favorites',)
@@ -84,17 +84,6 @@ class RecipeAdmin(admin.ModelAdmin):
         return format_html('<a href="{}">{} пользователь</a>', url, count)
 
     in_favorites.short_description = 'В избранном'
-
-    def consist(self, obj):
-        count = obj.ingredients.count()
-        url = (
-            reverse("admin:recipes_recipeingredient_changelist")
-            + "?"
-            + urlencode({"recipe__id": f"{obj.id}"})
-        )
-        return format_html('<a href="{}">{} шт.</a>', url, count)
-
-    consist.short_description = 'Ингредиенты'
 
     def tag(self, obj):
         return list(obj.tags.all())

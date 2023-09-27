@@ -2,6 +2,8 @@
 Настройка панели администратора.
 """
 from django.contrib import admin
+from django.core.exceptions import ValidationError
+from django.forms import BaseInlineFormSet
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.http import urlencode
@@ -41,8 +43,22 @@ class TagAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
+class RecipeIngredientFormSet(BaseInlineFormSet):
+    def clean(self):
+        counter = self.instance.ingredients.count()
+        for form in self.forms:
+            if form.cleaned_data.get('DELETE'):
+                counter -= 1
+        if counter <= 0:
+            raise ValidationError(
+                'Вы не можете удалить все ингредиенты из рецепта.'
+            )
+        return super().clean()
+
+
 class RecipeIngredientInline(admin.TabularInline):
     model = models.RecipeIngredient
+    formset = RecipeIngredientFormSet
     min_num = 1
 
 
@@ -84,12 +100,6 @@ class RecipeAdmin(admin.ModelAdmin):
         return list(obj.tags.all())
 
     tag.short_description = 'Теги'
-
-
-@admin.register(models.RecipeIngredient)
-class RecipeIngredientAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'recipe', 'ingredient', 'amount')
-    list_editable = ('recipe', 'ingredient', 'amount')
 
 
 @admin.register(models.Cart)

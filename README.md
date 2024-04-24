@@ -1,4 +1,4 @@
-# [Recipe_publishing_network](https://animalworld.zapto.org).
+# [Recipe_publishing_network](https://animalworld.zapto.org)
 [![Main Foodgram workflow](https://github.com/Tatiana314/foodgram-project-react/actions/workflows/main.yml/badge.svg)](https://github.com/Tatiana314/foodgram-project-react/actions/workflows/main.yml)
 
  Социальная сеть для публикации рецептов. Сайт, на котором пользователи могут публиковать рецепты, добавлять чужие рецепты в избранное и подписываться на публикации других авторов. Пользователям сайта доступен сервис «Список покупок». Он позволит создавать список продуктов, которые нужно купить для приготовления выбранных блюд.

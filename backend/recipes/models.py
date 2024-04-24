@@ -6,7 +6,6 @@ from django.core.exceptions import ValidationError
 from django.core.validators import (MaxValueValidator, MinValueValidator,
                                     RegexValidator)
 from django.db import models
-
 from foodgram.settings import AUTH_USER_MODEL
 
 RECIPE_DATA = '{name} - {author} - {date:%d.%m.%Y}'

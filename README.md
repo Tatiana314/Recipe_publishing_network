@@ -1,17 +1,25 @@
-# [foodgram-project-react](https://animalworld.zapto.org) - продуктовый помошник. Учебный проект Яндекс.Практикум.
+# [Recipe_publishing_network](https://animalworld.zapto.org).
 [![Main Foodgram workflow](https://github.com/Tatiana314/foodgram-project-react/actions/workflows/main.yml/badge.svg)](https://github.com/Tatiana314/foodgram-project-react/actions/workflows/main.yml)
 
- Сайт, на котором пользователи могут публиковать рецепты, добавлять чужие рецепты в избранное и подписываться на публикации других авторов. Пользователям сайта доступен сервис «Список покупок». Он позволит создавать список продуктов, которые нужно купить для приготовления выбранных блюд.
+ Социальная сеть для публикации рецептов. Сайт, на котором пользователи могут публиковать рецепты, добавлять чужие рецепты в избранное и подписываться на публикации других авторов. Пользователям сайта доступен сервис «Список покупок». Он позволит создавать список продуктов, которые нужно купить для приготовления выбранных блюд.
 
 ## Технологии
-Python3, Django3, HTML, CSS, JavaScript
+ HTML, CSS, JavaScript
+[![Python](https://img.shields.io/badge/-Python3.9-464646?style=flat&logo=Python&logoColor=ffffff&color=043A6B)](https://www.python.org/)
+[![Django](https://img.shields.io/badge/Django-4.2.4-blue?logo=django)](https://www.djangoproject.com/)
+[![Django](https://img.shields.io/badge/django--rest--framework-3.14.0-blue?)](https://www.django-rest-framework.org/)
+[![Django](https://img.shields.io/badge/Djoser-2.2.0-blue?)](https://djoser.readthedocs.io/en/latest/)
+[![Docker](https://img.shields.io/badge/Docker-blue?)](https://www.docker.com/)
+[![Nginx](https://img.shields.io/badge/Nginx-blue?)](https://nginx.org/ru/)
+[![Reportlab](https://img.shields.io/badge/Reportlab-4.0.4-blue?)](https://docs.reportlab.com/)
+
 
 ## Запуск проекта локально:
 Клонировать репозиторий:
 ```
-git clone https://github.com/Tatiana314/foodgram-project-react.git
+git clone https://github.com/Tatiana314/Recipe_publishing_network.git
 ```
-В директории foodgram-project-react/backend создать и активировать виртуальное окружение:
+В директории Recipe_publishing_network/backend создать и активировать виртуальное окружение:
 ```
 python -m venv venv
 Linux/macOS: source env/bin/activate
@@ -32,7 +40,7 @@ python manage.py createsuperuser
 
 ```
 ssh -i путь_до_файла_с_SSH_ключом/название_файла_с_SSH_ключом имя_пользователя@ip_адрес_сервера
-mkdir kittygram
+mkdir foodgram
 ```
 Установка docker compose на сервер:
 ```
@@ -84,3 +92,6 @@ location / {
 
 sudo nginx -t 
 sudo service nginx reload
+
+## Автор
+[Мусатова Татьяна](https://github.com/Tatiana314)

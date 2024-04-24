@@ -5,11 +5,10 @@ import base64
 
 from django.core.files.base import ContentFile
 from djoser.conf import settings
-from rest_framework import serializers, status
-from rest_framework.settings import api_settings
-
 from recipes.models import (Cart, Favorite, Ingredient, Recipe,
                             RecipeIngredient, Subscription, Tag, User)
+from rest_framework import serializers, status
+from rest_framework.settings import api_settings
 
 
 class CustomUserSerializer(serializers.ModelSerializer):

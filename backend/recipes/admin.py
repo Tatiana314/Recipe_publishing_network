@@ -45,14 +45,15 @@ class TagAdmin(admin.ModelAdmin):
 
 class RecipeIngredientFormSet(BaseInlineFormSet):
     def clean(self):
-        counter = self.instance.ingredients.count()
-        for form in self.forms:
-            if form.cleaned_data.get('DELETE'):
-                counter -= 1
-        if counter <= 0:
-            raise ValidationError(
-                'Вы не можете удалить все ингредиенты из рецепта.'
-            )
+        if self.instance.id:
+            counter = self.instance.ingredients.count()
+            for form in self.forms:
+                if form.cleaned_data.get('DELETE'):
+                    counter -= 1
+                    if counter <= 0:
+                        raise ValidationError(
+                            'Вы не можете удалить все ингредиенты из рецепта.'
+                        )
         return super().clean()
 
 

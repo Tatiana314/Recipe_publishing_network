@@ -4,7 +4,6 @@
  Социальная сеть для публикации рецептов. Сайт, на котором пользователи могут публиковать рецепты, добавлять чужие рецепты в избранное и подписываться на публикации других авторов. Пользователям сайта доступен сервис «Список покупок». Он позволит создавать список продуктов, которые нужно купить для приготовления выбранных блюд.
 
 ## Технологии
- HTML, CSS, JavaScript
 [![Python](https://img.shields.io/badge/-Python3.9-464646?style=flat&logo=Python&logoColor=ffffff&color=043A6B)](https://www.python.org/)
 [![Django](https://img.shields.io/badge/Django-4.2.4-blue?logo=django)](https://www.djangoproject.com/)
 [![Django](https://img.shields.io/badge/django--rest--framework-3.14.0-blue?)](https://www.django-rest-framework.org/)
